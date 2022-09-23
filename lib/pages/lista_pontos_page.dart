@@ -33,6 +33,12 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
 
   AppBar criarAppBar(){
     return AppBar(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(20.0),
+          bottomRight: Radius.circular(20.0)
+        )
+      ),
       title: const Text('Pontos Turísticos'),
       actions: [
         IconButton(
@@ -57,8 +63,9 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
         final ponto = pontos[index];
         return PopupMenuButton<String>(
           child: ListTile(
-            title: Text('${ponto.id} - ${ponto.descricao}'),
-            subtitle: Text('Data de Inclusão - ${ponto.dataInclusaoFormatada}'),
+            title: Text('${ponto.detalhe} - ${ponto.id}'),
+            isThreeLine: true,
+            subtitle: Text('${ponto.descricao}\nData de Inclusão - ${ponto.dataInclusaoFormatada}'),
           ),
           itemBuilder: (BuildContext context) => criarItensMenuPopup(),
           onSelected: (String valor){
@@ -100,6 +107,11 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
                       pontos[indice] = novoPonto;
                     }
                   });
+                  final snackBar = SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  content: Text(pontoAtual == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.'),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   Navigator.of(context).pop();
                 }
               },
@@ -172,6 +184,11 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
             TextButton(
               child: Text('OK'),
               onPressed: () {
+                final snackBar = SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  content: Text('Ponto excluído com sucesso.'),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 Navigator.of(context).pop();
                 setState(() {
                   pontos.removeAt(index);
