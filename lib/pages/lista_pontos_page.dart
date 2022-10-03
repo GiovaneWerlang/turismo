@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:turismo/dao/ponto_dao.dart';
 import 'package:turismo/model/ponto.dart';
 import 'package:turismo/widgets/conteudo_form_dialog.dart';
 
@@ -12,12 +14,17 @@ class ListaPontosPage extends StatefulWidget{
 
 class _ListaPontosPageState extends State<ListaPontosPage>{
 
-  var _ultimoId = 0;
-
   static const ACAO_EDITAR = 'editar';
   static const ACAO_EXCLUIR = 'excluir';
 
-  final pontos = <Ponto>[];
+  final _pontos = <Ponto>[];
+  final _dao = PontoDao();
+
+  @override
+  void initState(){
+    super.initState();
+    _atualizarLista();
+  }
 
   Widget build(BuildContext context){
     return Scaffold(
@@ -43,6 +50,7 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
       actions: [
         IconButton(
         onPressed: _abrirPaginaFiltro,
+        tooltip: 'Filtro e Ordenação',
         icon: Icon(Icons.filter_list),
         )
       ],
@@ -50,7 +58,7 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
   }
 
   Widget criarBody(){
-    if(pontos.isEmpty){
+    if(_pontos.isEmpty){
       return const Center(
         child: Text('Nenhum ponto turístico cadastrado!',
         style: TextStyle(fontSize: 20)
@@ -58,9 +66,9 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
     }
 
     return ListView.separated(
-      itemCount: pontos.length,
+      itemCount: _pontos.length,
       itemBuilder: (BuildContext context, int index){
-        final ponto = pontos[index];
+        final ponto = _pontos[index];
         return PopupMenuButton<String>(
           child: ListTile(
             title: Text('${ponto.detalhe} - ${ponto.id}'),
@@ -70,9 +78,9 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
           itemBuilder: (BuildContext context) => criarItensMenuPopup(),
           onSelected: (String valor){
             if(valor == ACAO_EDITAR){
-              _abrirForm(pontoAtual: ponto, indice: index);
+              _abrirForm(pontoAtual: ponto);
             }else if(valor == ACAO_EXCLUIR){
-              _excluir(index);
+              _excluir(ponto);
             }
           },
         );
@@ -81,7 +89,7 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
     );
   }
 
-  void _abrirForm({Ponto? pontoAtual, int? indice}){
+  void _abrirForm({Ponto? pontoAtual}){
     final key = GlobalKey<ConteudoFormDialogState>();
     showDialog(
       context: context,
@@ -100,12 +108,9 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
                 if(key.currentState != null && key.currentState!.dadosValidos()){
                   setState(() {
                     final novoPonto = key.currentState!.novoPonto;
-                    if(indice == null){
-                      novoPonto.id = ++ _ultimoId;
-                      pontos.add(novoPonto);
-                    }else{
-                      pontos[indice] = novoPonto;
-                    }
+                    _dao.salvar(novoPonto).then((success) => {
+                      _atualizarLista()
+                    });
                   });
                   final snackBar = SnackBar(
                   behavior: SnackBarBehavior.floating,
@@ -122,12 +127,30 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
     );
   }
 
-  void _abrirPaginaFiltro(){
+  Future<void> _abrirPaginaFiltro() async {
     final navigator = Navigator.of(context);
-    navigator.pushNamed(FiltroPage.ROUTE_NAME).then((_alterouValores) =>
-    {
-      if(_alterouValores == true){
-        //Todo
+    final alterouValores = await navigator.pushNamed(FiltroPage.ROUTE_NAME);
+
+    if(alterouValores == true){
+      _atualizarLista();
+    }
+  }
+
+  Future<void> _atualizarLista() async{
+    final prefs = await SharedPreferences.getInstance();
+    final campoOrdenacao = prefs.getString(FiltroPage.CHAVE_CAMPO_ORDENACAO) ?? Ponto.CAMPO_ID;
+    final usarOrdemDecrescente = prefs.getBool(FiltroPage.CHAVE_USAR_ORDEM_DECRESCENTE) == true;
+    final filtroDescricao = prefs.getString(FiltroPage.CHAVE_FILTRO_DESCRICAO) ?? '';
+
+    final pontos = await _dao.listar(
+      filtro: filtroDescricao,
+      campoOrdenacao: campoOrdenacao,
+      usarOrdemDecrescente: usarOrdemDecrescente,
+    );
+    setState(() {
+      _pontos.clear();
+      if(pontos.isNotEmpty){
+        _pontos.addAll(pontos);
       }
     });
   }
@@ -161,7 +184,7 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
     ];
   }
 
-  void _excluir(int index){
+  void _excluir(Ponto ponto){
     showDialog(
       context: context,
       builder: (BuildContext context){
@@ -190,10 +213,15 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
                 );
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 Navigator.of(context).pop();
-                setState(() {
-                  pontos.removeAt(index);
+                if(ponto.id == null){
+                  return;
+                }
+                _dao.remover(ponto.id!).then((success) => {
+                  if(success){
+                    _atualizarLista()
+                  }
                 });
-              }
+              },
             )
           ],
         );

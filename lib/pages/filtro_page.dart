@@ -71,7 +71,7 @@ class _FiltroPageState extends State<FiltroPage>{
                 groupValue: _campoOrdenacao,
                 onChanged: _onCampoOrdenacaoChanged,
               ),
-              Text(_camposParaOrdenacao[campo]?? ""),
+              Text(_camposParaOrdenacao[campo]?? ''),
             ],
           ),
         Divider(),

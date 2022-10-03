@@ -8,7 +8,10 @@ class ConteudoFormDialog extends StatefulWidget{
 
   ConteudoFormDialog( {Key? key, this.pontoAtual}) : super(key: key);
 
-  ConteudoFormDialogState createState() => ConteudoFormDialogState();
+  void init(){}
+
+  @override
+  State<StatefulWidget> createState() => ConteudoFormDialogState();
 }
 
 class ConteudoFormDialogState extends State<ConteudoFormDialog>{
@@ -42,7 +45,7 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
                   controller: _detalheController,
                   decoration: InputDecoration(labelText: 'Detalhes'),
                   validator: (String? valor){
-                    if(valor == null || valor.isEmpty){
+                    if(valor == null || valor.trim().isEmpty){
                       return "Informe os detalhes";
                     }
                     return null;
@@ -51,7 +54,7 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
                 controller: _descricaoController,
                 decoration: InputDecoration(labelText: 'Descrição'),
                 validator: (String? valor){
-                  if(valor == null || valor.isEmpty){
+                  if(valor == null || valor.trim().isEmpty){
                     return "Informe a descrição";
                   }
                   return null;
@@ -60,7 +63,7 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
                   controller: _diferencialController,
                   decoration: InputDecoration(labelText: 'Diferenciais'),
                   validator: (String? valor){
-                    if(valor == null || valor.isEmpty){
+                    if(valor == null || valor.trim().isEmpty){
                       return "Informe os diferenciais";
                     }
                     return null;
@@ -81,8 +84,9 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
   }
 
   bool dadosValidos() => _formKey.currentState?.validate() == true;
+
   Ponto get novoPonto => Ponto(
-    id: widget.pontoAtual?.id ?? 0,
+    id: widget.pontoAtual?.id,
     detalhe: _detalheController.text,
     descricao: _descricaoController.text,
     diferencial: _diferencialController.text,
