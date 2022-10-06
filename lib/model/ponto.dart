@@ -24,12 +24,12 @@ class Ponto{
     return DateFormat('dd/MM/yyyy').format(data_inclusao!);
   }
 
-  Map<String, dynamic> toMap() =>{
+  Map<String, dynamic> toMap() => <String, dynamic>{
     CAMPO_ID: id,
     CAMPO_DETALHE: detalhe,
     CAMPO_DESCRICAO: descricao,
     CAMPO_DIFERENCIAL: diferencial,
-    CAMPO_DATA_INCLUSAO: data_inclusao,
+    CAMPO_DATA_INCLUSAO: DateFormat('yyyy-MM-dd').format(data_inclusao!),
   };
 
   factory Ponto.fromMap(Map<String, dynamic> map) => Ponto(

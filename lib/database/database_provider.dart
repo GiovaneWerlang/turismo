@@ -11,7 +11,12 @@ class DatabaseProvider{
 
   Database? _database;
 
-  Future<Database> get database async => _database ??= await _initDatabase();
+  Future<Database> get database async {
+    if(_database == null){
+      _database = await _initDatabase();
+    }
+    return _database!;
+  }
 
   Future<Database> _initDatabase() async{
     final databasesPath = await getDatabasesPath();
@@ -33,7 +38,7 @@ class DatabaseProvider{
         ${Ponto.CAMPO_DESCRICAO} TEXT, 
         ${Ponto.CAMPO_DIFERENCIAL} TEXT, 
         ${Ponto.CAMPO_DATA_INCLUSAO} TEXT
-      );
+      )
     ''');
   }
 

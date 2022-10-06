@@ -20,6 +20,7 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
   final _detalheController = TextEditingController();
   final _descricaoController = TextEditingController();
   final _diferencialController = TextEditingController();
+
   final _dataController = TextEditingController();
   final _dateFormat = DateFormat('dd/MM/yyyy');
 
@@ -43,7 +44,9 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
             children: [
               TextFormField(
                   controller: _detalheController,
-                  decoration: InputDecoration(labelText: 'Detalhes'),
+                  decoration: InputDecoration(
+                      labelText: 'Detalhes'
+                  ),
                   validator: (String? valor){
                     if(valor == null || valor.trim().isEmpty){
                       return "Informe os detalhes";

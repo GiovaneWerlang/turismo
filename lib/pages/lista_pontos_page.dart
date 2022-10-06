@@ -4,6 +4,7 @@ import 'package:turismo/dao/ponto_dao.dart';
 import 'package:turismo/model/ponto.dart';
 import 'package:turismo/widgets/conteudo_form_dialog.dart';
 
+import 'detalhes_ponto_page.dart';
 import 'filtro_page.dart';
 
 class ListaPontosPage extends StatefulWidget{
@@ -16,9 +17,11 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
 
   static const ACAO_EDITAR = 'editar';
   static const ACAO_EXCLUIR = 'excluir';
+  static const ACAO_DETALHAR = 'detalhar';
 
   final _pontos = <Ponto>[];
   final _dao = PontoDao();
+  var _carregando = false;
 
   @override
   void initState(){
@@ -58,6 +61,31 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
   }
 
   Widget criarBody(){
+    if(_carregando){
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Align(
+            alignment: AlignmentDirectional.center,
+            child: CircularProgressIndicator(),
+          ),
+          Align(
+            alignment: AlignmentDirectional.center,
+            child: Padding(
+              padding: EdgeInsets.only(top: 10),
+              child: Text('Carregando tarefas',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green
+                ),
+              ),
+            ),
+          )
+        ],
+
+      );
+    }
     if(_pontos.isEmpty){
       return const Center(
         child: Text('Nenhum ponto turístico cadastrado!',
@@ -81,6 +109,10 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
               _abrirForm(pontoAtual: ponto);
             }else if(valor == ACAO_EXCLUIR){
               _excluir(ponto);
+            }else if(valor == ACAO_DETALHAR){
+              Navigator.of(context).push(MaterialPageRoute(//outra forma de abrir uma page
+                builder: (_) => DetalhesPontoPage(ponto: ponto),
+              ));
             }
           },
         );
@@ -129,14 +161,19 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
 
   Future<void> _abrirPaginaFiltro() async {
     final navigator = Navigator.of(context);
-    final alterouValores = await navigator.pushNamed(FiltroPage.ROUTE_NAME);
-
-    if(alterouValores == true){
-      _atualizarLista();
-    }
+    navigator.pushNamed(FiltroPage.ROUTE_NAME).then((_alterouValores) =>
+    {
+      if(_alterouValores == true){
+        _atualizarLista()
+      }
+    });
   }
 
   Future<void> _atualizarLista() async{
+    setState(() {
+      _carregando = true;
+    });
+    await Future.delayed(Duration(seconds: 2));
     final prefs = await SharedPreferences.getInstance();
     final campoOrdenacao = prefs.getString(FiltroPage.CHAVE_CAMPO_ORDENACAO) ?? Ponto.CAMPO_ID;
     final usarOrdemDecrescente = prefs.getBool(FiltroPage.CHAVE_USAR_ORDEM_DECRESCENTE) == true;
@@ -152,6 +189,7 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
       if(pontos.isNotEmpty){
         _pontos.addAll(pontos);
       }
+      _carregando = false;
     });
   }
 
@@ -180,7 +218,19 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
             )
           ],
         ),
-      )
+      ),
+      PopupMenuItem<String>(
+        value: ACAO_DETALHAR,
+        child: Row(
+          children: const [
+            Icon(Icons.info_outline, color: Colors.purple),
+            Padding(
+              padding: EdgeInsets.only(left: 10),
+              child: Text('Detalhar'),
+            ),
+          ],
+        ),
+      ),
     ];
   }
 
