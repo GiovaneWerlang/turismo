@@ -52,8 +52,20 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
           ),
           Row(
             children: [
-              Campo(descricao: 'Detalhe: '),
+              Campo(descricao: 'Data: '),
               Valor(valor: widget.ponto.dataInclusaoFormatada),
+            ],
+          ),
+          Row(
+            children: [
+              Campo(descricao: 'Latitude: '),
+              Valor(valor: widget.ponto.latitude.toString()),
+            ],
+          ),
+          Row(
+            children: [
+              Campo(descricao: 'Longitude: '),
+              Valor(valor: widget.ponto.longitude.toString()),
             ],
           ),
         ],

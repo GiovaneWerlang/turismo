@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turismo/dao/ponto_dao.dart';
 import 'package:turismo/model/ponto.dart';
+import 'package:turismo/pages/ponto_form_page.dart';
 import 'package:turismo/widgets/conteudo_form_dialog.dart';
 
 import 'detalhes_ponto_page.dart';
@@ -106,7 +107,8 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
           itemBuilder: (BuildContext context) => criarItensMenuPopup(),
           onSelected: (String valor){
             if(valor == ACAO_EDITAR){
-              _abrirForm(pontoAtual: ponto);
+              //_abrirForm(pontoAtual: ponto);
+              _abrirForm(ponto: ponto);
             }else if(valor == ACAO_EXCLUIR){
               _excluir(ponto);
             }else if(valor == ACAO_DETALHAR){
@@ -121,42 +123,48 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
     );
   }
 
-  void _abrirForm({Ponto? pontoAtual}){
-    final key = GlobalKey<ConteudoFormDialogState>();
-    showDialog(
-      context: context,
-      builder: (BuildContext context){
-        return AlertDialog(
-          title: Text(pontoAtual == null ? 'Novo Ponto Turístico' : 'Alterar Ponto ${pontoAtual.id}'),
-          content: ConteudoFormDialog(key: key, pontoAtual: pontoAtual,),
-          actions: [
-            TextButton(
-              child: Text('Cancelar'),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: Text('Confirmar'),
-              onPressed: (){
-                if(key.currentState != null && key.currentState!.dadosValidos()){
-                  setState(() {
-                    final novoPonto = key.currentState!.novoPonto;
-                    _dao.salvar(novoPonto).then((success) => {
-                      _atualizarLista()
-                    });
-                  });
-                  final snackBar = SnackBar(
-                  behavior: SnackBarBehavior.floating,
-                  content: Text(pontoAtual == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.'),
-                  );
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  Navigator.of(context).pop();
-                }
-              },
-            )
-          ],
-        );
-      }
-    );
+  // void _abrirForm({Ponto? pontoAtual}){
+  //   final key = GlobalKey<ConteudoFormDialogState>();
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context){
+  //       return AlertDialog(
+  //         title: Text(pontoAtual == null ? 'Novo Ponto Turístico' : 'Alterar Ponto ${pontoAtual.id}'),
+  //         content: ConteudoFormDialog(key: key, pontoAtual: pontoAtual,),
+  //         actions: [
+  //           TextButton(
+  //             child: Text('Cancelar'),
+  //             onPressed: () => Navigator.of(context).pop(),
+  //           ),
+  //           TextButton(
+  //             child: Text('Confirmar'),
+  //             onPressed: (){
+  //               if(key.currentState != null && key.currentState!.dadosValidos()){
+  //                 setState(() {
+  //                   final novoPonto = key.currentState!.novoPonto;
+  //                   _dao.salvar(novoPonto).then((success) => {
+  //                     _atualizarLista()
+  //                   });
+  //                 });
+  //                 final snackBar = SnackBar(
+  //                 behavior: SnackBarBehavior.floating,
+  //                 content: Text(pontoAtual == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.'),
+  //                 );
+  //                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  //                 Navigator.of(context).pop();
+  //               }
+  //             },
+  //           )
+  //         ],
+  //       );
+  //     }
+  //   );
+  // }
+
+  Future<void> _abrirForm({Ponto? ponto}) async {
+    Navigator.of(context).push(MaterialPageRoute(//outra forma de abrir uma page
+      builder: (_) => PontoFormPage(ponto: ponto,),
+    ));
   }
 
   Future<void> _abrirPaginaFiltro() async {

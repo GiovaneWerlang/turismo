@@ -4,7 +4,7 @@ import 'package:turismo/model/ponto.dart';
 class DatabaseProvider{
 
   static const _dbName = 'pontos_turismo.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
 
   DatabaseProvider._init();
   static final DatabaseProvider instance = DatabaseProvider._init();
@@ -44,7 +44,13 @@ class DatabaseProvider{
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async{
     switch(oldVersion){
-
+      case 1:
+        await db.execute('''
+          ALTER TABLE ${Ponto.NOME_TABELA} ADD ${Ponto.CAMPO_LATITUDE} REAL NOT NULL DEFAULT 0;
+        ''');
+        await db.execute('''
+          ALTER TABLE ${Ponto.NOME_TABELA} ADD ${Ponto.CAMPO_LONGITUDE} REAL NOT NULL DEFAULT 0;
+        ''');
     }
   }
 

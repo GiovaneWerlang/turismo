@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:turismo/pages/filtro_page.dart';
 import 'package:turismo/pages/lista_pontos_page.dart';
+import 'package:turismo/pages/ponto_form_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,4 +25,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

@@ -24,6 +24,9 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
   final _dataController = TextEditingController();
   final _dateFormat = DateFormat('dd/MM/yyyy');
 
+  final _latitudeController = TextEditingController();
+  final _longitudeController = TextEditingController();
+
   void initState(){
     super.initState();
     if(widget.pontoAtual != null){
@@ -31,8 +34,11 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
       _descricaoController.text = widget.pontoAtual!.descricao;
       _diferencialController.text = widget.pontoAtual!.diferencial;
       _dataController.text = widget.pontoAtual!.dataInclusaoFormatada;
+      _latitudeController.text = widget.pontoAtual!.latitude.toString();
+      _longitudeController.text = widget.pontoAtual!.longitude.toString();
     }
     _addData();
+    _addCoordenadas();
   }
 
   Widget build(BuildContext context){
@@ -86,6 +92,10 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
     _dataController.text = _dateFormat.format(data);
   }
 
+  _addCoordenadas(){
+
+  }
+
   bool dadosValidos() => _formKey.currentState?.validate() == true;
 
   Ponto get novoPonto => Ponto(
@@ -93,6 +103,8 @@ class ConteudoFormDialogState extends State<ConteudoFormDialog>{
     detalhe: _detalheController.text,
     descricao: _descricaoController.text,
     diferencial: _diferencialController.text,
-    data_inclusao: _dataController.text.isEmpty ? null : _dateFormat.parse(_dataController.text)
+    data_inclusao: _dataController.text.isEmpty ? null : _dateFormat.parse(_dataController.text),
+    latitude: widget.pontoAtual!.latitude,
+    longitude: widget.pontoAtual!.longitude,
   );
 }

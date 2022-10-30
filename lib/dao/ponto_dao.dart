@@ -57,7 +57,9 @@ class PontoDao{
         Ponto.CAMPO_DETALHE,
         Ponto.CAMPO_DESCRICAO,
         Ponto.CAMPO_DIFERENCIAL,
-        Ponto.CAMPO_DATA_INCLUSAO
+        Ponto.CAMPO_DATA_INCLUSAO,
+        Ponto.CAMPO_LATITUDE,
+        Ponto.CAMPO_LONGITUDE,
       ],
       where: where,
       orderBy: orderBy,
