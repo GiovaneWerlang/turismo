@@ -162,9 +162,30 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
   // }
 
   Future<void> _abrirForm({Ponto? ponto}) async {
-    Navigator.of(context).push(MaterialPageRoute(//outra forma de abrir uma page
-      builder: (_) => PontoFormPage(ponto: ponto,),
-    ));
+    final navigator = Navigator.of(context);
+    // Navigator.of(context).push(MaterialPageRoute(//outra forma de abrir uma page
+    //   builder: (_) => PontoFormPage(ponto: ponto,),
+    // ));
+    //navigator.pushNamed( "${PontoFormPage.ROUTE_NAME}/${ponto}"
+    navigator.pushNamed( PontoFormPage.ROUTE_NAME,
+        arguments:
+        ponto?.routeMap()
+    //   Ponto(
+    //   id: ponto?.id,
+    //   detalhe: ponto?.detalhe == null ? ponto!.detalhe : '',
+    //   descricao: ponto?.descricao == null ? ponto!.detalhe : '',
+    //   diferencial: ponto?.diferencial == null ? ponto!.detalhe : '',
+    //   data_inclusao: ponto?.data_inclusao == null ? ponto!.data_inclusao : null,
+    //   latitude: ponto?.latitude == null ? ponto!.latitude : 0,
+    //   longitude: ponto?.longitude == null ? ponto!.longitude : 0,
+    // )
+    ).then((_alterouValores) =>
+    {
+      if(_alterouValores == true){
+        _atualizarLista()
+      }
+    }
+    );
   }
 
   Future<void> _abrirPaginaFiltro() async {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:turismo/generator/route_generator.dart';
 import 'package:turismo/pages/filtro_page.dart';
 import 'package:turismo/pages/lista_pontos_page.dart';
 import 'package:turismo/pages/ponto_form_page.dart';
@@ -10,18 +11,25 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
+
+
   @override
   Widget build(BuildContext context) {
+
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Pontos Turísticos',
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: ListaPontosPage(),
-      routes: {
-        FiltroPage.ROUTE_NAME: (BuildContext context) => FiltroPage(),
-      },
+      initialRoute: '/',
+      onGenerateRoute: RouteGenerator.generateRoute,
+      // home: ListaPontosPage(),
+      // routes: {
+      //   FiltroPage.ROUTE_NAME: (BuildContext context) => FiltroPage(),
+      //   PontoFormPage.ROUTE_NAME: (BuildContext context) => PontoFormPage(),
+      // },
     );
   }
 }

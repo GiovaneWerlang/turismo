@@ -46,6 +46,16 @@ class Ponto{
     CAMPO_LONGITUDE: longitude,
   };
 
+  Map<String, dynamic> routeMap() => <String, dynamic>{
+    CAMPO_ID: id,
+    CAMPO_DETALHE: detalhe,
+    CAMPO_DESCRICAO: descricao,
+    CAMPO_DIFERENCIAL: diferencial,
+    CAMPO_DATA_INCLUSAO: data_inclusao!,
+    CAMPO_LATITUDE: latitude,
+    CAMPO_LONGITUDE: longitude,
+  };
+
   factory Ponto.fromMap(Map<String, dynamic> map) => Ponto(
     id: map[CAMPO_ID] is int ? map[CAMPO_ID] : null,
     detalhe: map[CAMPO_DETALHE] is String ? map[CAMPO_DETALHE] : '',

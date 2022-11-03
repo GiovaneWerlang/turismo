@@ -4,18 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:turismo/model/ponto.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../dao/ponto_dao.dart';
+import '../model/ponto.dart';
 
 class PontoFormPage extends StatefulWidget{
 
-  Ponto? ponto;
+  static const ROUTE_NAME = '/ponto';
 
-  StreamSubscription<Position>? _subscription;
-  Position? _ultimaPosicaoObtida;
+  Ponto ponto;
 
-  PontoFormPage({Key? key, this.ponto}) : super(key: key);
+  //StreamSubscription<Position>? _subscription;
+  //Position? _ultimaPosicaoObtida;
+
+  PontoFormPage({
+    Key? key,
+    required this.ponto
+  }) : super(key: key);
 
   @override
   _PontoFormPageState createState() => _PontoFormPageState();
@@ -36,21 +41,36 @@ class _PontoFormPageState extends State<PontoFormPage>{
 
   final _dao = PontoDao();
 
+  bool _alterouValores = false;
+
   void initState(){
     super.initState();
+    //atualizaPonto(widget.ponto);
     if(widget.ponto != null){
       _detalheController.text = widget.ponto!.detalhe;
       _descricaoController.text = widget.ponto!.descricao;
       _diferencialController.text = widget.ponto!.diferencial;
-      _dataController.text = widget.ponto!.dataInclusaoFormatada;
+      _dataController.text = widget.ponto!.data_inclusao.toString();
       _latitudeController.text = widget.ponto!.latitude.toString();
       _longitudeController.text = widget.ponto!.longitude.toString();
     }
     _addData();
-    _addCoordenadas();
   }
 
-
+  // void atualizaPonto(dynamic pontoDados){
+  //   setState(() {
+  //     if(pontoDados == null){
+  //       widget.ponto = novoPonto;
+  //       return;
+  //     }
+  //     _detalheController.text = widget.ponto!.detalhe;
+  //     _descricaoController.text = widget.ponto!.descricao;
+  //     _diferencialController.text = widget.ponto!.diferencial;
+  //     _dataController.text = widget.ponto!.dataInclusaoFormatada;
+  //     _latitudeController.text = widget.ponto!.latitude.toString();
+  //     _longitudeController.text = widget.ponto!.longitude.toString();
+  //   });
+  // }
 
 
   @override
@@ -58,7 +78,7 @@ class _PontoFormPageState extends State<PontoFormPage>{
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.ponto == null ? 'Novo Ponto Turístico' : 'Alterar Ponto ${widget.ponto!.id}'),
+          title: Text(widget.ponto.id == null ? 'Novo Ponto Turístico' : 'Alterar Ponto ${widget.ponto.id}'),
         ),
         body: _criarBody(),
       ),
@@ -109,9 +129,9 @@ class _PontoFormPageState extends State<PontoFormPage>{
                     padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        _addCoordenadas;
+                        _obterLocalizacaoAtual();
                       },
-                      child: Text(widget.ponto == null ? 'Inserir Localização' : 'Alterar Localização'),
+                      child: Text(widget.ponto.id == null ? 'Inserir Localização' : 'Alterar Localização'),
                     ),
                   ),
                 ]
@@ -132,8 +152,8 @@ class _PontoFormPageState extends State<PontoFormPage>{
                     onPressed: () {
                       if(_formKey.currentState != null && dadosValidos()){
                         setState(() {
-                          _dao.salvar(novoPonto).then((success) => {
-                            //_atualizarLista()
+                            _dao.salvar(novoPonto).then((success) => {
+                            _alterouValores = true,
                             _mostrarMensagem(widget.ponto == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.')
                             //Navigator.of(context).pop(),
                           });
@@ -190,15 +210,16 @@ class _PontoFormPageState extends State<PontoFormPage>{
   }
 
   Future<bool> _onVoltarClick() async {
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(_alterouValores);
     return true;
   }
 
   _addData(){
     final dataFormatada = _dataController.text;
     DateTime data = DateTime.now();
-    if(dataFormatada.isNotEmpty){
-      data = _dateFormat.parse(dataFormatada);
+    if(dataFormatada.isNotEmpty && dataFormatada != "null"){
+      data = DateFormat('yyyy-MM-dd').parse(dataFormatada);
+      //DateFormat('yyyy-MM-dd').format(data);
     }
     _dataController.text = _dateFormat.format(data);
   }
@@ -206,8 +227,6 @@ class _PontoFormPageState extends State<PontoFormPage>{
   _addCoordenadas(){
     _obterLocalizacaoAtual();
   }
-
-
 
   void _obterUltimaLocalizacao() async {
     bool permissoesPermitidas = await _permissoesPermitidas();
@@ -298,8 +317,8 @@ class _PontoFormPageState extends State<PontoFormPage>{
     descricao: _descricaoController.text,
     diferencial: _diferencialController.text,
     data_inclusao: _dataController.text.isEmpty ? null : _dateFormat.parse(_dataController.text),
-    latitude: double.parse(_latitudeController.text),
-    longitude: double.parse(_longitudeController.text),
+    latitude: _latitudeController.text.isEmpty ? 0 : double.parse(_latitudeController.text),
+    longitude: _longitudeController.text.isEmpty ? 0 : double.parse(_longitudeController.text),
   );
 
 }
