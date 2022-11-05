@@ -123,62 +123,15 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
     );
   }
 
-  // void _abrirForm({Ponto? pontoAtual}){
-  //   final key = GlobalKey<ConteudoFormDialogState>();
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context){
-  //       return AlertDialog(
-  //         title: Text(pontoAtual == null ? 'Novo Ponto Turístico' : 'Alterar Ponto ${pontoAtual.id}'),
-  //         content: ConteudoFormDialog(key: key, pontoAtual: pontoAtual,),
-  //         actions: [
-  //           TextButton(
-  //             child: Text('Cancelar'),
-  //             onPressed: () => Navigator.of(context).pop(),
-  //           ),
-  //           TextButton(
-  //             child: Text('Confirmar'),
-  //             onPressed: (){
-  //               if(key.currentState != null && key.currentState!.dadosValidos()){
-  //                 setState(() {
-  //                   final novoPonto = key.currentState!.novoPonto;
-  //                   _dao.salvar(novoPonto).then((success) => {
-  //                     _atualizarLista()
-  //                   });
-  //                 });
-  //                 final snackBar = SnackBar(
-  //                 behavior: SnackBarBehavior.floating,
-  //                 content: Text(pontoAtual == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.'),
-  //                 );
-  //                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  //                 Navigator.of(context).pop();
-  //               }
-  //             },
-  //           )
-  //         ],
-  //       );
-  //     }
-  //   );
-  // }
-
   Future<void> _abrirForm({Ponto? ponto}) async {
     final navigator = Navigator.of(context);
     // Navigator.of(context).push(MaterialPageRoute(//outra forma de abrir uma page
     //   builder: (_) => PontoFormPage(ponto: ponto,),
     // ));
-    //navigator.pushNamed( "${PontoFormPage.ROUTE_NAME}/${ponto}"
+
     navigator.pushNamed( PontoFormPage.ROUTE_NAME,
         arguments:
         ponto?.routeMap()
-    //   Ponto(
-    //   id: ponto?.id,
-    //   detalhe: ponto?.detalhe == null ? ponto!.detalhe : '',
-    //   descricao: ponto?.descricao == null ? ponto!.detalhe : '',
-    //   diferencial: ponto?.diferencial == null ? ponto!.detalhe : '',
-    //   data_inclusao: ponto?.data_inclusao == null ? ponto!.data_inclusao : null,
-    //   latitude: ponto?.latitude == null ? ponto!.latitude : 0,
-    //   longitude: ponto?.longitude == null ? ponto!.longitude : 0,
-    // )
     ).then((_alterouValores) =>
     {
       if(_alterouValores == true){

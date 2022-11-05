@@ -23,51 +23,78 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
 
   Widget _criarBody(){
     return Padding(
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.all(20),
       child: ListView(
         children: [
-          Row(
-            children: [
-              Campo(descricao: 'Código: '),
-              Valor(valor: '${widget.ponto.id}'),
-            ],
+          Container(
+            margin: EdgeInsets.only(top:10),
+            child:
+            Row(
+              children: [
+                Campo(descricao: 'Código: '),
+                Valor(valor: '${widget.ponto.id}'),
+              ],
+            )
           ),
-          Row(
-            children: [
-              Campo(descricao: 'Detalhe: '),
-              Valor(valor: widget.ponto.detalhe),
-            ],
+          Container(
+            margin: EdgeInsets.only(top:10),
+            child:
+            Row(
+              children: [
+                Campo(descricao: 'Detalhe: '),
+                Valor(valor: widget.ponto.detalhe),
+              ],
+            )
           ),
-          Row(
-            children: [
-              Campo(descricao: 'Descrição: '),
-              Valor(valor: widget.ponto.descricao),
-            ],
+          Container(
+              margin: EdgeInsets.only(top:10),
+              child:
+              Row(
+              children: [
+                  Campo(descricao: 'Descrição: '),
+                  Valor(valor: widget.ponto.descricao),
+                ],
+            )
           ),
-          Row(
+          Container(
+            margin: EdgeInsets.only(top:10),
+            child:
+            Row(
             children: [
-              Campo(descricao: 'Diferencial: '),
-              Valor(valor: widget.ponto.diferencial),
-            ],
+                Campo(descricao: 'Diferencial: '),
+                Valor(valor: widget.ponto.diferencial),
+              ],
+            )
           ),
-          Row(
+          Container(
+            margin: EdgeInsets.only(top:10),
+            child:
+            Row(
             children: [
               Campo(descricao: 'Data: '),
               Valor(valor: widget.ponto.dataInclusaoFormatada),
             ],
+            )
           ),
-          Row(
+          Container(
+            margin: EdgeInsets.only(top:10),
+            child:
+            Row(
             children: [
               Campo(descricao: 'Latitude: '),
               Valor(valor: widget.ponto.latitude.toString()),
             ],
+            )
           ),
-          Row(
+          Container(
+            margin: EdgeInsets.only(top:10),
+            child:
+            Row(
             children: [
               Campo(descricao: 'Longitude: '),
               Valor(valor: widget.ponto.longitude.toString()),
             ],
-          ),
+          )),
         ],
       ),
     );

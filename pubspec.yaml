@@ -38,6 +38,8 @@ dependencies:
   shared_preferences: ^2.0.15
   sqflite: ^2.0.3
   geolocator: ^9.0.2
+  maps_launcher: ^2.0.1
+  google_maps_flutter: ^2.2.1
 
 dev_dependencies:
   flutter_test:

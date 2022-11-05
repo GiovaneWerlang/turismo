@@ -25,11 +25,6 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       onGenerateRoute: RouteGenerator.generateRoute,
-      // home: ListaPontosPage(),
-      // routes: {
-      //   FiltroPage.ROUTE_NAME: (BuildContext context) => FiltroPage(),
-      //   PontoFormPage.ROUTE_NAME: (BuildContext context) => PontoFormPage(),
-      // },
     );
   }
 }

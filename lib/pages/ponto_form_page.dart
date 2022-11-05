@@ -12,9 +12,8 @@ class PontoFormPage extends StatefulWidget{
 
   static const ROUTE_NAME = '/ponto';
 
-  Ponto ponto;
+  Ponto ponto; //a forma correta é salvar no banco e puxar
 
-  //StreamSubscription<Position>? _subscription;
   //Position? _ultimaPosicaoObtida;
 
   PontoFormPage({
@@ -45,7 +44,6 @@ class _PontoFormPageState extends State<PontoFormPage>{
 
   void initState(){
     super.initState();
-    //atualizaPonto(widget.ponto);
     if(widget.ponto != null){
       _detalheController.text = widget.ponto!.detalhe;
       _descricaoController.text = widget.ponto!.descricao;
@@ -56,22 +54,6 @@ class _PontoFormPageState extends State<PontoFormPage>{
     }
     _addData();
   }
-
-  // void atualizaPonto(dynamic pontoDados){
-  //   setState(() {
-  //     if(pontoDados == null){
-  //       widget.ponto = novoPonto;
-  //       return;
-  //     }
-  //     _detalheController.text = widget.ponto!.detalhe;
-  //     _descricaoController.text = widget.ponto!.descricao;
-  //     _diferencialController.text = widget.ponto!.diferencial;
-  //     _dataController.text = widget.ponto!.dataInclusaoFormatada;
-  //     _latitudeController.text = widget.ponto!.latitude.toString();
-  //     _longitudeController.text = widget.ponto!.longitude.toString();
-  //   });
-  // }
-
 
   @override
   Widget build(BuildContext context) {
@@ -150,21 +132,25 @@ class _PontoFormPageState extends State<PontoFormPage>{
                   padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      if(_formKey.currentState != null && dadosValidos()){
-                        setState(() {
-                            _dao.salvar(novoPonto).then((success) => {
-                            _alterouValores = true,
-                            _mostrarMensagem(widget.ponto == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.')
-                            //Navigator.of(context).pop(),
+                      if(_formKey.currentState != null && dadosValidos()) {
+                        if (novoPonto.longitude == 0 &&
+                            novoPonto.latitude == 0) {
+                          _mostrarMensagem(
+                              'É necessário incluir a localização.');
+                        } else {
+                          setState(() {
+                            _dao.salvar(novoPonto).then((success) =>
+                            {
+                              if(success){
+                                _alterouValores = true,
+                                _mostrarMensagem(widget.ponto == null
+                                    ? 'Ponto incluído com sucesso.'
+                                    : 'Ponto alterado com sucesso.'),
+                                Navigator.of(context).pop(_alterouValores)
+                              }
+                            });
                           });
-                        });
-                        // final snackBar = SnackBar(
-                        // behavior: SnackBarBehavior.floating,
-                        // content: Text(widget.pontoAtual == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.'),
-                        // );
-                        // ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                        //_mostrarMensagem(widget.pontoAtual == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.');
-                        Navigator.of(context).pop();
+                        }
                       }
                     },
                     child: const Text('Confirmar'),
@@ -172,37 +158,6 @@ class _PontoFormPageState extends State<PontoFormPage>{
                 ),
               ],
             ),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(vertical: 16.0),
-            //   child: ElevatedButton(
-            //     onPressed: () => Navigator.of(context).pop(),
-            //     child: const Text('Cancelar'),
-            //   ),
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(vertical: 16.0),
-            //   child: ElevatedButton(
-            //     onPressed: () {
-            //       if(_formKey.currentState != null && dadosValidos()){
-            //         setState(() {
-            //           _dao.salvar(novoPonto).then((success) => {
-            //             //_atualizarLista()
-            //             _mostrarMensagem(widget.ponto == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.')
-            //             //Navigator.of(context).pop(),
-            //           });
-            //         });
-            //         // final snackBar = SnackBar(
-            //         // behavior: SnackBarBehavior.floating,
-            //         // content: Text(widget.pontoAtual == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.'),
-            //         // );
-            //         // ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            //         //_mostrarMensagem(widget.pontoAtual == null ? 'Ponto incluído com sucesso.' : 'Ponto alterado com sucesso.');
-            //         Navigator.of(context).pop();
-            //       }
-            //     },
-            //     child: const Text('Confirmar'),
-            //   ),
-            // ),
           ],
         )
       )
@@ -219,7 +174,6 @@ class _PontoFormPageState extends State<PontoFormPage>{
     DateTime data = DateTime.now();
     if(dataFormatada.isNotEmpty && dataFormatada != "null"){
       data = DateFormat('yyyy-MM-dd').parse(dataFormatada);
-      //DateFormat('yyyy-MM-dd').format(data);
     }
     _dataController.text = _dateFormat.format(data);
   }
@@ -236,8 +190,7 @@ class _PontoFormPageState extends State<PontoFormPage>{
     Position? position = await Geolocator.getLastKnownPosition();
         _latitudeController.text = position != null ? position.latitude.toString() : '0';
         _longitudeController.text = position != null ? position.longitude.toString() : '0';
-            //'Latitude: ${position.latitude} | Longitude: ${position.longitude}');
-      }
+  }
 
 
   void _obterLocalizacaoAtual() async {
@@ -252,8 +205,6 @@ class _PontoFormPageState extends State<PontoFormPage>{
     Position position = await Geolocator.getCurrentPosition();
     _latitudeController.text = position.latitude.toString();
     _longitudeController.text = position.longitude.toString();
-          //'Latitude: ${position.latitude} | Longitude: ${position.longitude}');
-
   }
 
   Future<bool> _servicoHabilitado() async {
