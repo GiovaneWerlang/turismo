@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 import 'package:turismo/model/ponto.dart';
 
 import '../dao/ponto_dao.dart';
 import '../model/ponto.dart';
+import 'mapa_page.dart';
 
 class PontoFormPage extends StatefulWidget{
 
@@ -14,7 +16,6 @@ class PontoFormPage extends StatefulWidget{
 
   Ponto ponto; //a forma correta é salvar no banco e puxar
 
-  //Position? _ultimaPosicaoObtida;
 
   PontoFormPage({
     Key? key,
@@ -41,6 +42,12 @@ class _PontoFormPageState extends State<PontoFormPage>{
   final _dao = PontoDao();
 
   bool _alterouValores = false;
+
+  Position? _localizacaoAtual;
+  final _controller = TextEditingController();
+
+  String get _textoLocalizacao => _localizacaoAtual == null ? '' : 'Latidude: ${_localizacaoAtual!.latitude}   |  Longitude: ${_localizacaoAtual!.longitude}';
+
 
   void initState(){
     super.initState();
@@ -118,6 +125,48 @@ class _PontoFormPageState extends State<PontoFormPage>{
                   ),
                 ]
             ),
+            if(_textoLocalizacao != null)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children:[
+                Flexible(
+                  //padding: const EdgeInsets.symmetric(horizontal: 10),
+                  flex: 1,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Expanded(
+                        child: Text(_textoLocalizacao),
+                      ),
+                      ElevatedButton(
+                          onPressed: _abriNoMapaInterno,
+                          child: const Icon(Icons.map))
+                    ],
+                  ),
+                ),
+                ]
+            ),
+                Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children:[
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                          labelText: 'Endereço ou ponto de referência',
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.map),
+                            tooltip: 'Abrir no Mapa',
+                            onPressed: _abrirNoMapaExterno,
+                          )
+                    ),
+                  ),
+                )
+              ]
+            ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -143,7 +192,7 @@ class _PontoFormPageState extends State<PontoFormPage>{
                             {
                               if(success){
                                 _alterouValores = true,
-                                _mostrarMensagem(widget.ponto == null
+                                _mostrarMensagem(widget.ponto.id == null
                                     ? 'Ponto incluído com sucesso.'
                                     : 'Ponto alterado com sucesso.'),
                                 Navigator.of(context).pop(_alterouValores)
@@ -187,9 +236,12 @@ class _PontoFormPageState extends State<PontoFormPage>{
     if (!permissoesPermitidas) {
       return;
     }
-    Position? position = await Geolocator.getLastKnownPosition();
-        _latitudeController.text = position != null ? position.latitude.toString() : '0';
-        _longitudeController.text = position != null ? position.longitude.toString() : '0';
+    _localizacaoAtual = await Geolocator.getLastKnownPosition();
+        _latitudeController.text = _localizacaoAtual != null ? _localizacaoAtual!.latitude.toString() : '0';
+        _longitudeController.text = _localizacaoAtual != null ? _localizacaoAtual!.longitude.toString() : '0';
+    setState(() {
+
+    });
   }
 
 
@@ -202,9 +254,12 @@ class _PontoFormPageState extends State<PontoFormPage>{
     if (!permissoesPermitidas) {
       return;
     }
-    Position position = await Geolocator.getCurrentPosition();
-    _latitudeController.text = position.latitude.toString();
-    _longitudeController.text = position.longitude.toString();
+    _localizacaoAtual = await Geolocator.getCurrentPosition();
+    _latitudeController.text = _localizacaoAtual!.latitude.toString();
+    _longitudeController.text = _localizacaoAtual!.longitude.toString();
+    setState(() {
+
+    });
   }
 
   Future<bool> _servicoHabilitado() async {
@@ -272,4 +327,33 @@ class _PontoFormPageState extends State<PontoFormPage>{
     longitude: _longitudeController.text.isEmpty ? 0 : double.parse(_longitudeController.text),
   );
 
+  void _abriNoMapaInterno(){
+    if(_localizacaoAtual == null){
+      return;
+    }
+    Navigator.push(context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => MapaPage(
+            latitude: _localizacaoAtual!.latitude,
+            longitude: _localizacaoAtual!.longitude,
+          ),
+        ));
+  }
+
+  void _abrirCoordenadasNoMapa(){
+    if(_localizacaoAtual == null){
+      return;
+    }
+    MapsLauncher.launchCoordinates(
+      _localizacaoAtual!.latitude,
+      _localizacaoAtual!.longitude,
+    );
+  }
+
+  void _abrirNoMapaExterno (){
+    if(_controller.text.trim().isEmpty){
+      return;
+    }
+    MapsLauncher.launchQuery(_controller.text);
+  }
 }
