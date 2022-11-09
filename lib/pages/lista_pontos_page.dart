@@ -74,7 +74,7 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
             alignment: AlignmentDirectional.center,
             child: Padding(
               padding: EdgeInsets.only(top: 10),
-              child: Text('Carregando tarefas',
+              child: Text('Carregando pontos',
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

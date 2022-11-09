@@ -125,29 +125,29 @@ class _PontoFormPageState extends State<PontoFormPage>{
                   ),
                 ]
             ),
-            if(_textoLocalizacao != null)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children:[
-                Flexible(
-                  //padding: const EdgeInsets.symmetric(horizontal: 10),
-                  flex: 1,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Expanded(
-                        child: Text(_textoLocalizacao),
-                      ),
-                      ElevatedButton(
-                          onPressed: _abriNoMapaInterno,
-                          child: const Icon(Icons.map))
-                    ],
-                  ),
-                ),
-                ]
-            ),
+            // if(_textoLocalizacao != null)
+            // Row(
+            //   crossAxisAlignment: CrossAxisAlignment.center,
+            //   mainAxisSize: MainAxisSize.min,
+            //   children:[
+            //     Flexible(
+            //       //padding: const EdgeInsets.symmetric(horizontal: 10),
+            //       flex: 1,
+            //       child: Row(
+            //         crossAxisAlignment: CrossAxisAlignment.center,
+            //         mainAxisSize: MainAxisSize.min,
+            //         children: [
+            //           Expanded(
+            //             child: Text(_textoLocalizacao),
+            //           ),
+            //           ElevatedButton(
+            //               onPressed: _abrirCoordenadasNoMapa,
+            //               child: const Icon(Icons.map))
+            //         ],
+            //       ),
+            //     ),
+            //     ]
+            // ),
                 Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
@@ -156,7 +156,8 @@ class _PontoFormPageState extends State<PontoFormPage>{
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                          labelText: 'Endereço ou ponto de referência',
+                        label: Text('Localização incorreta?'),
+                          //labelText: 'Endereço ou ponto de referência',
                           suffixIcon: IconButton(
                             icon: Icon(Icons.map),
                             tooltip: 'Abrir no Mapa',
@@ -227,22 +228,22 @@ class _PontoFormPageState extends State<PontoFormPage>{
     _dataController.text = _dateFormat.format(data);
   }
 
-  _addCoordenadas(){
-    _obterLocalizacaoAtual();
-  }
+  // _addCoordenadas(){
+  //   _obterLocalizacaoAtual();
+  // }
 
-  void _obterUltimaLocalizacao() async {
-    bool permissoesPermitidas = await _permissoesPermitidas();
-    if (!permissoesPermitidas) {
-      return;
-    }
-    _localizacaoAtual = await Geolocator.getLastKnownPosition();
-        _latitudeController.text = _localizacaoAtual != null ? _localizacaoAtual!.latitude.toString() : '0';
-        _longitudeController.text = _localizacaoAtual != null ? _localizacaoAtual!.longitude.toString() : '0';
-    setState(() {
-
-    });
-  }
+  // void _obterUltimaLocalizacao() async {
+  //   bool permissoesPermitidas = await _permissoesPermitidas();
+  //   if (!permissoesPermitidas) {
+  //     return;
+  //   }
+  //   _localizacaoAtual = await Geolocator.getLastKnownPosition();
+  //       _latitudeController.text = _localizacaoAtual != null ? _localizacaoAtual!.latitude.toString() : '0';
+  //       _longitudeController.text = _localizacaoAtual != null ? _localizacaoAtual!.longitude.toString() : '0';
+  //   setState(() {
+  //
+  //   });
+  // }
 
 
   void _obterLocalizacaoAtual() async {
@@ -260,6 +261,8 @@ class _PontoFormPageState extends State<PontoFormPage>{
     setState(() {
 
     });
+    _mostrarMensagem('Localização incluída com sucesso.');
+    _abriNoMapaInterno();
   }
 
   Future<bool> _servicoHabilitado() async {
@@ -329,6 +332,7 @@ class _PontoFormPageState extends State<PontoFormPage>{
 
   void _abriNoMapaInterno(){
     if(_localizacaoAtual == null){
+      _mostrarMensagem("A localização ainda não foi informada.");
       return;
     }
     Navigator.push(context,
@@ -340,18 +344,20 @@ class _PontoFormPageState extends State<PontoFormPage>{
         ));
   }
 
-  void _abrirCoordenadasNoMapa(){
-    if(_localizacaoAtual == null){
-      return;
-    }
-    MapsLauncher.launchCoordinates(
-      _localizacaoAtual!.latitude,
-      _localizacaoAtual!.longitude,
-    );
-  }
+  // void _abrirCoordenadasNoMapa(){
+  //   if(_localizacaoAtual == null){
+  //     _mostrarMensagem("A localização ainda não foi informada.");
+  //     return;
+  //   }
+  //   MapsLauncher.launchCoordinates(
+  //     _localizacaoAtual!.latitude,
+  //     _localizacaoAtual!.longitude,
+  //   );
+  // }
 
   void _abrirNoMapaExterno (){
     if(_controller.text.trim().isEmpty){
+      _mostrarMensagem("Informe um endereço ou ponto de referencia.");
       return;
     }
     MapsLauncher.launchQuery(_controller.text);

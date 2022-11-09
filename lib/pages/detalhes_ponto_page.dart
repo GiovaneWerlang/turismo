@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 import '../model/ponto.dart';
+import 'mapa_page.dart';
 
 class DetalhesPontoPage extends StatefulWidget{
   final Ponto ponto;
@@ -95,8 +97,74 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
               Valor(valor: widget.ponto.longitude.toString()),
             ],
           )),
+          Container(
+            margin: EdgeInsets.only(top: 10),
+            child:
+            Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _abrirNoMapaInterno();
+                      },
+                      child: Text('Abrir no mapa interno'),
+                    ),
+                  ),
+                ]
+            ),
+          ),
+          Container(
+            child:
+            Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _abrirNoMapaExterno();
+                      },
+                      child: Text('Abrir no google maps'),
+                    ),
+                  ),
+                ]
+            ),
+          )
         ],
       ),
+    );
+  }
+
+  void _mostrarMensagem(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(mensagem),
+    ));
+  }
+
+  void _abrirNoMapaInterno(){
+    if(widget.ponto.latitude == null || widget.ponto.longitude == null){
+      _mostrarMensagem("O ponto não possui localização.");
+      return;
+    }
+    Navigator.push(context,
+        MaterialPageRoute(
+          builder: (BuildContext context) => MapaPage(
+            latitude: widget.ponto.latitude,
+            longitude: widget.ponto.longitude,
+          ),
+        ));
+  }
+
+  void _abrirNoMapaExterno(){
+    if(widget.ponto.latitude == null || widget.ponto.longitude == null){
+      _mostrarMensagem("O ponto não possui localização.");
+      return;
+    }
+    MapsLauncher.launchCoordinates(
+      widget.ponto.latitude,
+      widget.ponto.longitude
     );
   }
 }
