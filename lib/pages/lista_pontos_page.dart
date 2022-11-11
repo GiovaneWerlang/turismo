@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turismo/dao/ponto_dao.dart';
 import 'package:turismo/model/ponto.dart';
 import 'package:turismo/pages/ponto_form_page.dart';
-import 'package:turismo/widgets/conteudo_form_dialog.dart';
 
 import 'detalhes_ponto_page.dart';
 import 'filtro_page.dart';
@@ -107,7 +106,6 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
           itemBuilder: (BuildContext context) => criarItensMenuPopup(),
           onSelected: (String valor){
             if(valor == ACAO_EDITAR){
-              //_abrirForm(pontoAtual: ponto);
               _abrirForm(ponto: ponto);
             }else if(valor == ACAO_EXCLUIR){
               _excluir(ponto);
@@ -125,9 +123,6 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
 
   Future<void> _abrirForm({Ponto? ponto}) async {
     final navigator = Navigator.of(context);
-    // Navigator.of(context).push(MaterialPageRoute(//outra forma de abrir uma page
-    //   builder: (_) => PontoFormPage(ponto: ponto,),
-    // ));
 
     navigator.pushNamed( PontoFormPage.ROUTE_NAME,
         arguments:

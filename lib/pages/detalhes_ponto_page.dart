@@ -1,6 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:maps_launcher/maps_launcher.dart';
+import 'package:turismo/pages/rota_page.dart';
 import '../model/ponto.dart';
 import 'mapa_page.dart';
 
@@ -13,6 +17,9 @@ class DetalhesPontoPage extends StatefulWidget{
 }
 
 class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
+
+  Position? _localizacaoAtual;
+
 
   Widget build(BuildContext context){
     return Scaffold(
@@ -131,6 +138,54 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
                   ),
                 ]
             ),
+          ),
+          Container(
+            child:
+            Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _calcularDistancia();
+                      },
+                      child: Text('Calcular distância'),
+                    ),
+                  ),
+                ]
+            ),
+          ),
+          Container(
+            child:
+            Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _getlocalizacaoAtual();
+                        if(_localizacaoAtual != null) {
+                          Navigator.of(context).push(
+                              MaterialPageRoute( //outra forma de abrir uma page
+                                builder: (_) =>
+                                    RotaPage(
+                                        latitudeInicial:_localizacaoAtual!.latitude,
+                                        longitudeInicial:_localizacaoAtual!.longitude,
+                                        latitudeFinal: widget.ponto.latitude,
+                                        longitudeFinal: widget.ponto.longitude
+                                    ),
+                              ));
+                        }else{
+                          _mostrarMensagem("Localização não pode ser obtida.");
+                        }
+                      },
+                      child: Text('Visualizar Rota'),
+                    ),
+                  ),
+                ]
+            ),
           )
         ],
       ),
@@ -167,6 +222,89 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
       widget.ponto.longitude
     );
   }
+
+  void _calcularDistancia() async{
+    bool servicoHabilitado = await _servicoHabilitado();
+    if (!servicoHabilitado) {
+      return;
+    }
+    bool permissoesPermitidas = await _permissoesPermitidas();
+    if (!permissoesPermitidas) {
+      return;
+    }
+    _localizacaoAtual = await Geolocator.getCurrentPosition();
+    if(_localizacaoAtual != null){
+
+      var p = 0.017453292519943295;
+      var a = 0.5 - cos(( widget.ponto.latitude - _localizacaoAtual!.latitude) * p)/2 +
+          cos(_localizacaoAtual!.latitude * p) * cos(widget.ponto.latitude * p) *
+              (1 - cos((widget.ponto.longitude - _localizacaoAtual!.longitude) * p))/2;
+      _mostrarMensagem("Distância: " + (12742 * asin(sqrt(a))).toString() + " metros");
+
+      //_mostrarMensagem("Distância: " + Geolocator.distanceBetween(_localizacaoAtual!.latitude, _localizacaoAtual!.longitude, widget.ponto.latitude, widget.ponto.latitude).toString() + " metros");
+    }
+  }
+
+  void _getlocalizacaoAtual() async{
+    bool servicoHabilitado = await _servicoHabilitado();
+    if (!servicoHabilitado) {
+      return;
+    }
+    bool permissoesPermitidas = await _permissoesPermitidas();
+    if (!permissoesPermitidas) {
+      return;
+    }
+    _localizacaoAtual = await Geolocator.getCurrentPosition();
+  }
+
+
+  Future<bool> _servicoHabilitado() async {
+    bool servicoHabilitado = await Geolocator.isLocationServiceEnabled();
+    if (!servicoHabilitado) {
+      await _mostrarDialogMensagem('Para utilizar esse recurso, você deverá '
+          'habilitar o serviço de localização do dispositivo');
+      Geolocator.openLocationSettings();
+      return false;
+    }
+    return true;
+  }
+
+  Future<bool> _permissoesPermitidas() async {
+    LocationPermission permissao = await Geolocator.checkPermission();
+    if (permissao == LocationPermission.denied) {
+      permissao = await Geolocator.requestPermission();
+      if (permissao == LocationPermission.denied) {
+        _mostrarMensagem(
+            'Não será possível utilizar o recurso por falta de permissão');
+        return false;
+      }
+    }
+    if (permissao == LocationPermission.deniedForever) {
+      await _mostrarDialogMensagem(
+          'Para utilizar esse recurso, você deverá acessar as configurações '
+              'do app e permitir a utilização do serviço de localização');
+      Geolocator.openAppSettings();
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _mostrarDialogMensagem(String mensagem) async {
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Atenção'),
+        content: Text(mensagem),
+        actions: [
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
 
 class Campo extends StatelessWidget{
