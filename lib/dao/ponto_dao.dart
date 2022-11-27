@@ -60,6 +60,9 @@ class PontoDao{
         Ponto.CAMPO_DATA_INCLUSAO,
         Ponto.CAMPO_LATITUDE,
         Ponto.CAMPO_LONGITUDE,
+        Ponto.CAMPO_TIPO_IMAGEM,
+        Ponto.CAMPO_CAMINHO_IMAGEM,
+        Ponto.CAMPO_CAMINHO_VIDEO
       ],
       where: where,
       orderBy: orderBy,

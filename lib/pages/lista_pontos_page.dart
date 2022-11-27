@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:turismo/dao/ponto_dao.dart';
 import 'package:turismo/model/ponto.dart';
 import 'package:turismo/pages/ponto_form_page.dart';
+import 'package:turismo/widgets/visualizador_de_imagem.dart';
 
 import 'detalhes_ponto_page.dart';
 import 'filtro_page.dart';
@@ -102,6 +103,10 @@ class _ListaPontosPageState extends State<ListaPontosPage>{
             title: Text('${ponto.detalhe} - ${ponto.id}'),
             isThreeLine: true,
             subtitle: Text('${ponto.descricao}\nData de Inclusão - ${ponto.dataInclusaoFormatada}'),
+            trailing: VisualizadorImagem(
+              tipoImagem: ponto.tipoImagem,
+              caminhoImagem: ponto.caminhoImagem,
+            ),
           ),
           itemBuilder: (BuildContext context) => criarItensMenuPopup(),
           onSelected: (String valor){

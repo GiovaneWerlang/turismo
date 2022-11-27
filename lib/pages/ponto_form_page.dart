@@ -1,16 +1,24 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:maps_launcher/maps_launcher.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:turismo/model/ponto.dart';
+import 'package:uuid/uuid.dart';
+import 'package:video_player/video_player.dart';
 
 import '../dao/ponto_dao.dart';
-import '../model/ponto.dart';
+import '../widgets/visualizador_de_imagem.dart';
+import 'camera_page.dart';
 import 'mapa_page.dart';
 
 class PontoFormPage extends StatefulWidget{
+  static const imagem = 'imagem';
+  static const video = 'video';
 
   static const ROUTE_NAME = '/ponto';
 
@@ -44,6 +52,14 @@ class _PontoFormPageState extends State<PontoFormPage>{
   bool _alterouValores = false;
 
   Position? _localizacaoAtual;
+
+  late String _tipoImagem;
+  String? _caminhoImagem;
+  String? _caminhoVideo;
+  final _picker = ImagePicker();
+  VideoPlayerController? _videoPlayerController;
+  bool _reproduzindoVideo = false;
+
   final _controller = TextEditingController();
 
   void initState(){
@@ -55,9 +71,22 @@ class _PontoFormPageState extends State<PontoFormPage>{
       _dataController.text = widget.ponto!.data_inclusao.toString();
       _latitudeController.text = widget.ponto!.latitude.toString();
       _longitudeController.text = widget.ponto!.longitude.toString();
+      _tipoImagem = widget.ponto!.tipoImagem;
+      _caminhoImagem = widget.ponto!.caminhoImagem;
+      _caminhoVideo = widget.ponto!.caminhoVideo;
+    } else {
+      _tipoImagem = Ponto.TIPO_IMAGEM_ASSETS;
     }
+    _inicializarVideoPlayerController();
+
     _addData();
   }
+
+@override
+void dispose() {
+  _videoPlayerController?.dispose();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -73,61 +102,57 @@ class _PontoFormPageState extends State<PontoFormPage>{
   }
 
   Widget _criarBody() {
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextFormField(
-                controller: _detalheController,
-                decoration: InputDecoration(
-                    labelText: 'Detalhes'
-                ),
-                validator: (String? valor){
-                  if(valor == null || valor.trim().isEmpty){
-                    return "Informe os detalhes";
-                  }
-                  return null;
-                }),
-            TextFormField(
-                controller: _descricaoController,
-                decoration: InputDecoration(labelText: 'Descrição'),
-                validator: (String? valor){
-                  if(valor == null || valor.trim().isEmpty){
-                    return "Informe a descrição";
-                  }
-                  return null;
-                }),
-            TextFormField(
-                controller: _diferencialController,
-                decoration: InputDecoration(labelText: 'Diferenciais'),
-                validator: (String? valor){
-                  if(valor == null || valor.trim().isEmpty){
-                    return "Informe os diferenciais";
-                  }
-                  return null;
-                }),
-            Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _obterLocalizacaoAtual();
-                      },
-                      child: Text(widget.ponto.id == null ? 'Inserir Localização' : 'Alterar Localização'),
+    return LayoutBuilder(
+      builder: (_, BoxConstraints constraints) {
+        return Padding(
+          padding: const EdgeInsets.all(10),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                TextFormField(
+                    controller: _detalheController,
+                    decoration: InputDecoration(
+                        labelText: 'Detalhes'
                     ),
+                    validator: (String? valor){
+                      if(valor == null || valor.trim().isEmpty){
+                        return "Informe os detalhes";
+                      }
+                      return null;
+                    }),
+                TextFormField(
+                    controller: _descricaoController,
+                    decoration: InputDecoration(labelText: 'Descrição'),
+                    validator: (String? valor){
+                      if(valor == null || valor.trim().isEmpty){
+                        return "Informe a descrição";
+                      }
+                      return null;
+                    }),
+                TextFormField(
+                    controller: _diferencialController,
+                    decoration: InputDecoration(labelText: 'Diferenciais'),
+                    validator: (String? valor){
+                      if(valor == null || valor.trim().isEmpty){
+                        return "Informe os diferenciais";
+                      }
+                      return null;
+                    }),
+
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _obterLocalizacaoAtual();
+                    },
+                    child: Text(widget.ponto.id == null ? 'Inserir Localização' : 'Alterar Localização'),
                   ),
-                ]
-            ),
-                Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children:[
-                  Expanded(
-                    child: TextField(
+                ),
+
+
+                TextField(
                       controller: _controller,
                       decoration: InputDecoration(
                         label: Text('Localização incorreta?'),
@@ -137,13 +162,78 @@ class _PontoFormPageState extends State<PontoFormPage>{
                             onPressed: _abrirNoMapaExterno,
                           )
                     ),
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.only(top: 15),
+                  child: Text('Tipo da Imagem'),
+                ),
+                DropdownButton(
+                  value: _tipoImagem,
+                  items: Ponto.TIPOS_PERMITIDOS
+                      .map((tipoImagem) => DropdownMenuItem(
+                    value: tipoImagem,
+                    child: Text(Ponto.getTipoImagemLabel(tipoImagem)),
+                  ))
+                      .toList(),
+                  isExpanded: true,
+                  onChanged: (String? novoValor) {
+                    if (novoValor?.isNotEmpty == true) {
+                      setState(() {
+                        _tipoImagem = novoValor!;
+                      });
+                    }
+                  },
+                ),
+                if (_tipoImagem == Ponto.TIPO_IMAGEM_FILE) ...[
+                  ElevatedButton(
+                    child: const Text('Obter da Galeria'),
+                    onPressed: () => _usarImagePicker(
+                        ImageSource.gallery, PontoFormPage.imagem),
                   ),
-                )
-              ]
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+                  ElevatedButton(
+                    child: const Text('Usar câmera interna'),
+                    onPressed: () => _usarCamera(PontoFormPage.imagem),
+                  ),
+                  ElevatedButton(
+                    child: const Text('Usar câmera externa'),
+                    onPressed: () => _usarImagePicker(
+                        ImageSource.camera, PontoFormPage.imagem),
+                  ),
+                ],
+
+                VisualizadorImagem(
+                  tipoImagem: _tipoImagem,
+                  caminhoImagem: _caminhoImagem,
+                  size: constraints.maxWidth,
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 15),
+                  child: Text('Vídeo'),
+                ),
+                ElevatedButton(
+                  child: const Text('Obter da Galeria'),
+                  onPressed: () => _usarImagePicker(
+                      ImageSource.gallery, PontoFormPage.video),
+                ),
+                ElevatedButton(
+                  child: const Text('Usar câmera interna'),
+                  onPressed: () => _usarCamera(PontoFormPage.video),
+                ),
+                ElevatedButton(
+                  child: const Text('Usar câmera externa'),
+                  onPressed: () => _usarImagePicker(
+                      ImageSource.camera, PontoFormPage.video),
+                ),
+                _criarWidgetVideo(),
+                if (_videoPlayerController != null)
+                  ElevatedButton(
+                    child: Icon(_videoPlayerController!.value.isPlaying
+                        ? Icons.pause
+                        : Icons.play_arrow),
+                    onPressed: _iniciarPararVideo,
+                  ),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                   child: ElevatedButton(
@@ -181,9 +271,9 @@ class _PontoFormPageState extends State<PontoFormPage>{
                 ),
               ],
             ),
-          ],
-        )
-      )
+          ),
+        );
+      },
     );
   }
 
@@ -283,6 +373,9 @@ class _PontoFormPageState extends State<PontoFormPage>{
     data_inclusao: _dataController.text.isEmpty ? null : _dateFormat.parse(_dataController.text),
     latitude: _latitudeController.text.isEmpty ? 0 : double.parse(_latitudeController.text),
     longitude: _longitudeController.text.isEmpty ? 0 : double.parse(_longitudeController.text),
+    tipoImagem: _tipoImagem,
+    caminhoImagem: _caminhoImagem,
+    caminhoVideo: _caminhoVideo,
   );
 
   void _abriNoMapaInterno(){
@@ -305,5 +398,86 @@ class _PontoFormPageState extends State<PontoFormPage>{
       return;
     }
     MapsLauncher.launchQuery(_controller.text);
+  }
+
+  Future<void> _usarImagePicker(ImageSource origem, String tipo) async {
+    XFile? arquivo;
+    if (tipo == PontoFormPage.imagem) {
+      arquivo = await _picker.pickImage(source: origem);
+    } else {
+      arquivo = await _picker.pickVideo(source: origem);
+    }
+    if (arquivo == null) {
+      return;
+    }
+    return _tratarArquivo(arquivo, tipo);
+  }
+
+  Future<void> _tratarArquivo(XFile arquivo, String tipo) async {
+    final diretorioBase = await getApplicationDocumentsDirectory();
+    final idArquivo = Uuid().v1();
+    var caminho = '${diretorioBase.path}/$idArquivo' +
+        (tipo == PontoFormPage.imagem ? '.jpg' : '.mp4');
+    await arquivo.saveTo(caminho);
+    if (tipo == PontoFormPage.imagem) {
+      setState(() {
+        _caminhoImagem = caminho;
+      });
+    } else {
+      _caminhoVideo = caminho;
+      await _inicializarVideoPlayerController();
+    }
+  }
+
+  Future<void> _usarCamera(String tipo) async {
+    final arquivo = await Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => CameraPage(tipo: tipo),
+    ));
+    if (arquivo == null) {
+      return;
+    }
+    return _tratarArquivo(arquivo, tipo);
+  }
+
+  Future<void> _inicializarVideoPlayerController() async {
+    if (_caminhoVideo == null || _caminhoVideo!.isEmpty) {
+      return;
+    }
+    if (_videoPlayerController != null) {
+      await _videoPlayerController!.dispose();
+      _videoPlayerController = null;
+    }
+    final arquivoVideo = File(_caminhoVideo!);
+    _videoPlayerController = VideoPlayerController.file(arquivoVideo);
+    _videoPlayerController!.addListener(() {
+      if (_reproduzindoVideo && !_videoPlayerController!.value.isPlaying) {
+        setState(() {});
+      }
+    });
+    await _videoPlayerController!.initialize();
+    setState(() {});
+  }
+
+  Widget _criarWidgetVideo() {
+    if (_videoPlayerController == null ||
+        !_videoPlayerController!.value.isInitialized) {
+      return Container();
+    }
+    return AspectRatio(
+      aspectRatio: _videoPlayerController!.value.aspectRatio,
+      child: VideoPlayer(_videoPlayerController!),
+    );
+  }
+
+  void _iniciarPararVideo() {
+    setState(() {
+      if (_videoPlayerController!.value.isPlaying) {
+        _videoPlayerController!.pause();
+        _reproduzindoVideo = false;
+      } else {
+        _videoPlayerController!.play();
+        _reproduzindoVideo = true;
+      }
+    });
   }
 }

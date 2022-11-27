@@ -4,7 +4,7 @@ import 'package:turismo/model/ponto.dart';
 class DatabaseProvider{
 
   static const _dbName = 'pontos_turismo.db';
-  static const _dbVersion = 2;
+  static const _dbVersion = 3;
 
   DatabaseProvider._init();
   static final DatabaseProvider instance = DatabaseProvider._init();
@@ -51,6 +51,18 @@ class DatabaseProvider{
         await db.execute('''
           ALTER TABLE ${Ponto.NOME_TABELA} ADD ${Ponto.CAMPO_LONGITUDE} REAL NOT NULL DEFAULT 0;
         ''');
+        break;
+      case 2:
+        await db.execute('''
+          ALTER TABLE ${Ponto.NOME_TABELA} ADD ${Ponto.CAMPO_TIPO_IMAGEM} TEXT NOT NULL DEFAULT ' '
+        ''');
+        await db.execute('''
+          ALTER TABLE ${Ponto.NOME_TABELA} ADD ${Ponto.CAMPO_CAMINHO_IMAGEM} TEXT
+        ''');
+        await db.execute('''
+          ALTER TABLE ${Ponto.NOME_TABELA} ADD ${Ponto.CAMPO_CAMINHO_VIDEO} TEXT
+        ''');
+        break;
     }
   }
 
