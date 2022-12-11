@@ -35,10 +35,15 @@ class _VisualizadorImagemState extends State<VisualizadorImagem> {
   }
 
   DecorationImage? _criarWidgetImagem() {
+    var caminho = widget.caminhoImagem;
+    if(caminho == null) caminho = 'assets/imagem_${Random().nextInt(3) + 1}.jpg';
     if (widget.tipoImagem == Ponto.TIPO_IMAGEM_NETWORK) {
-      final random = Random();
-      final caminho = 'https://picsum.photos/200?random=${random.nextInt(100) + 1}';
-      widget.caminhoImagem = caminho;
+      if(widget.caminhoImagem == null || widget.caminhoImagem!.contains('assets')) {
+        final random = Random();
+        caminho = 'https://picsum.photos/200?random=${random.nextInt(
+            100) + 1}';
+        widget.caminhoImagem = caminho;
+      }
       return DecorationImage(
         image: NetworkImage(
           caminho,
@@ -56,9 +61,11 @@ class _VisualizadorImagemState extends State<VisualizadorImagem> {
         return null;
       }
     } else {
-      final random = Random();
-      final caminho = 'assets/imagem_${random.nextInt(3) + 1}.jpg';
-      widget.caminhoImagem = caminho;
+      if(widget.caminhoImagem == null || widget.caminhoImagem!.contains('picsum')) {
+        final random = Random();
+        final caminho = 'assets/imagem_${random.nextInt(3) + 1}.jpg';
+        widget.caminhoImagem = caminho;
+      }
       return DecorationImage(
         image: AssetImage(caminho),
       );

@@ -135,11 +135,29 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
               Valor(valor: widget.ponto.longitude.toString()),
             ],
           )),
-          VisualizadorImagem(
-            tipoImagem: widget.ponto.tipoImagem,
-            caminhoImagem: widget.ponto.caminhoImagem,
-            size: ((MediaQuery.of(context).size.width) / 0.5),
-          ),
+          Container(
+              margin: EdgeInsets.only(top:10),
+              child:
+              Row(
+                children: [
+                  Campo(descricao: 'Tipo da imagem: '),
+                  Valor(valor: widget.ponto.tipoImagem.toString()),
+                ],
+              )),
+          Container(
+              margin: EdgeInsets.only(top:10),
+              child:
+              Row(
+                children: [
+                  Campo(descricao: 'Caminho da imagem: '),
+                  Valor(valor: widget.ponto.caminhoImagem.toString()),
+                ],
+              )),
+          // VisualizadorImagem(
+          //   tipoImagem: widget.ponto.tipoImagem,
+          //   caminhoImagem: widget.ponto.caminhoImagem,
+          //   size: ((MediaQuery.of(context).size.width) / 0.5),
+          // ),
           Container(
             margin: EdgeInsets.only(top: 10),
             child:

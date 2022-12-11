@@ -23,6 +23,9 @@ class RouteGenerator{
         DateTime? data_inclusao;
         double latitude = 0;
         double longitude = 0;
+        String tipoImagem = '';
+        String caminhoImagem = '';
+        //String caminhoVideo = '';
         String cep = '';
         String cidade = '';
         String uf = '';
@@ -37,6 +40,9 @@ class RouteGenerator{
           data_inclusao = dados['data_inclusao'];
           latitude = dados['latitude'];
           longitude = dados['longitude'];
+          tipoImagem = dados['tipo_imagem'];
+          caminhoImagem = dados['caminho_imagem'];
+          //caminhoVideo = dados['caminho_video'];
           cep = dados['cep'];
           cidade = dados['cidade'];
           uf = dados['uf'];
@@ -52,6 +58,9 @@ class RouteGenerator{
               data_inclusao: data_inclusao,
               latitude: latitude,
               longitude: longitude,
+              tipoImagem: tipoImagem,
+              caminhoImagem: caminhoImagem,
+              //caminhoVideo: caminhoVideo,
               cep: cep,
               cidade: cidade,
               uf: uf,

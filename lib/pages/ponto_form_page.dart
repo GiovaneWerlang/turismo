@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -244,6 +245,14 @@ void dispose() {
                     if (novoValor?.isNotEmpty == true) {
                       setState(() {
                         _tipoImagem = novoValor!;
+                        if(_tipoImagem ==  Ponto.TIPO_IMAGEM_NETWORK){
+                          if(_caminhoImagem == null)
+                            _caminhoImagem = 'https://picsum.photos/200?random=${Random().nextInt(100) + 1}';
+                        }
+                        if(_tipoImagem ==  Ponto.TIPO_IMAGEM_ASSETS){
+                          if(_caminhoImagem == null)
+                          _caminhoImagem = 'assets/imagem_${Random().nextInt(3) + 1}.jpg';
+                        }
                       });
                     }
                   },
@@ -264,11 +273,17 @@ void dispose() {
                         ImageSource.camera, PontoFormPage.imagem),
                   ),
                 ],
-
-                VisualizadorImagem(
-                  tipoImagem: _tipoImagem,
-                  caminhoImagem: _caminhoImagem,
-                  size: constraints.maxWidth,
+                // VisualizadorImagem(
+                //   tipoImagem: _tipoImagem,
+                //   caminhoImagem: _caminhoImagem,
+                //   size: constraints.maxWidth,
+                // ),
+                Container(
+                width: ((MediaQuery.of(context).size.width) / 0.5),
+                height:  ((MediaQuery.of(context).size.width) / 0.5),
+                decoration: BoxDecoration(
+                image: _criarWidgetImagem(),
+                ),
                 ),
                 const Padding(
                   padding: EdgeInsets.only(top: 15),
@@ -572,4 +587,45 @@ void dispose() {
       _pesquisandoCep = false;
     });
   }
+
+  DecorationImage? _criarWidgetImagem() {
+    var caminho = _caminhoImagem;
+    if(caminho == null || caminho.isEmpty){
+      caminho = 'assets/imagem_${Random().nextInt(3) + 1}.jpg';
+    }
+      if (_tipoImagem == Ponto.TIPO_IMAGEM_NETWORK) {
+        if(_caminhoImagem == null || _caminhoImagem!.contains('assets')) {
+          final random = Random();
+          caminho = 'https://picsum.photos/200?random=${random.nextInt(
+              100) + 1}';
+          _caminhoImagem = caminho;
+        }
+        return DecorationImage(
+          image: NetworkImage(
+            caminho,
+          ),
+
+        );
+      } else if(_tipoImagem == Ponto.TIPO_IMAGEM_FILE) {
+        if (_caminhoImagem?.isNotEmpty == true) {
+          final file = File(_caminhoImagem!);
+          _caminhoImagem = file.path;
+          return DecorationImage(
+            image: FileImage(file),
+          );
+        } else {
+          return null;
+        }
+      } else {
+        if(_caminhoImagem == null || _caminhoImagem!.contains('picsum')) {
+          final random = Random();
+          final caminho = 'assets/imagem_${random.nextInt(3) + 1}.jpg';
+          _caminhoImagem = caminho;
+        }
+        return DecorationImage(
+          image: AssetImage(caminho),
+        );
+      }
+    }
+
 }
