@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:turismo/model/ponto.dart';
 import 'package:flutter/material.dart';
 
+typedef void StringCallback(String val);
 class VisualizadorImagem extends StatefulWidget {
   final String tipoImagem;
-  final String? caminhoImagem;
+  late  String? caminhoImagem;
   final double size;
 
-  const VisualizadorImagem({
+   VisualizadorImagem({
     Key? key,
     required this.tipoImagem,
     this.caminhoImagem,
@@ -36,14 +37,18 @@ class _VisualizadorImagemState extends State<VisualizadorImagem> {
   DecorationImage? _criarWidgetImagem() {
     if (widget.tipoImagem == Ponto.TIPO_IMAGEM_NETWORK) {
       final random = Random();
+      final caminho = 'https://picsum.photos/200?random=${random.nextInt(100) + 1}';
+      widget.caminhoImagem = caminho;
       return DecorationImage(
         image: NetworkImage(
-          'https://picsum.photos/200?random=${random.nextInt(100) + 1}',
+          caminho,
         ),
+
       );
     } else if (widget.tipoImagem == Ponto.TIPO_IMAGEM_FILE) {
       if (widget.caminhoImagem?.isNotEmpty == true) {
         final file = File(widget.caminhoImagem!);
+        widget.caminhoImagem = file.path;
         return DecorationImage(
           image: FileImage(file),
         );
@@ -52,8 +57,10 @@ class _VisualizadorImagemState extends State<VisualizadorImagem> {
       }
     } else {
       final random = Random();
+      final caminho = 'assets/imagem_${random.nextInt(3) + 1}.jpg';
+      widget.caminhoImagem = caminho;
       return DecorationImage(
-        image: AssetImage('assets/imagem_${random.nextInt(3) + 1}.jpg'),
+        image: AssetImage(caminho),
       );
     }
   }

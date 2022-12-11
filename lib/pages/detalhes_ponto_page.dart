@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:maps_launcher/maps_launcher.dart';
 import 'package:turismo/pages/rota_page.dart';
 import '../model/ponto.dart';
+import '../widgets/visualizador_de_imagem.dart';
 import 'mapa_page.dart';
 
 class DetalhesPontoPage extends StatefulWidget{
@@ -76,6 +77,36 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
             )
           ),
           Container(
+              margin: EdgeInsets.only(top:10),
+              child:
+              Row(
+                children: [
+                  Campo(descricao: 'CEP: '),
+                  Valor(valor: widget.ponto.cep.toString()),
+                ],
+              )
+          ),
+          Container(
+              margin: EdgeInsets.only(top:10),
+              child:
+              Row(
+                children: [
+                  Campo(descricao: 'Cidade: '),
+                  Valor(valor: widget.ponto.cidade.toString()),
+                ],
+              )
+          ),
+          Container(
+              margin: EdgeInsets.only(top:10),
+              child:
+              Row(
+                children: [
+                  Campo(descricao: 'UF: '),
+                  Valor(valor: widget.ponto.uf.toString()),
+                ],
+              )
+          ),
+          Container(
             margin: EdgeInsets.only(top:10),
             child:
             Row(
@@ -104,6 +135,11 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
               Valor(valor: widget.ponto.longitude.toString()),
             ],
           )),
+          VisualizadorImagem(
+            tipoImagem: widget.ponto.tipoImagem,
+            caminhoImagem: widget.ponto.caminhoImagem,
+            size: ((MediaQuery.of(context).size.width) / 0.5),
+          ),
           Container(
             margin: EdgeInsets.only(top: 10),
             child:

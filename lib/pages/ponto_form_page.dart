@@ -6,12 +6,15 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:maps_launcher/maps_launcher.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:turismo/model/ponto.dart';
 import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
 
 import '../dao/ponto_dao.dart';
+import '../model/cep.dart';
+import '../services/cep_service.dart';
 import '../widgets/visualizador_de_imagem.dart';
 import 'camera_page.dart';
 import 'mapa_page.dart';
@@ -60,7 +63,19 @@ class _PontoFormPageState extends State<PontoFormPage>{
   VideoPlayerController? _videoPlayerController;
   bool _reproduzindoVideo = false;
 
+  final _cepController = TextEditingController();
+  final _cidadeController = TextEditingController();
+  final _ufController = TextEditingController();
+
   final _controller = TextEditingController();
+
+  final _service = CepService();
+  final _cepFormatter = MaskTextInputFormatter(
+      mask: '#####-###',
+      filter: {'#' : RegExp(r'[0-9]')}
+  );
+  Cep? _cep;
+  var _pesquisandoCep = false;
 
   void initState(){
     super.initState();
@@ -74,8 +89,13 @@ class _PontoFormPageState extends State<PontoFormPage>{
       _tipoImagem = widget.ponto!.tipoImagem;
       _caminhoImagem = widget.ponto!.caminhoImagem;
       _caminhoVideo = widget.ponto!.caminhoVideo;
+      _cepController.text = widget.ponto!.cep.toString();
+      _cidadeController.text = widget.ponto!.cidade.toString();
+      _ufController.text = widget.ponto!.uf.toString();
     } else {
       _tipoImagem = Ponto.TIPO_IMAGEM_ASSETS;
+      _cidadeController.text = ' ';
+      _ufController.text = ' ';
     }
     _inicializarVideoPlayerController();
 
@@ -140,6 +160,49 @@ void dispose() {
                       }
                       return null;
                     }),
+                TextFormField(
+                    controller: _cepController,
+                    decoration: InputDecoration(
+                        labelText: 'CEP',
+                        suffixIcon: _pesquisandoCep ? const Padding(
+                          padding: EdgeInsets.all(10),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        ) : IconButton(
+                          onPressed: _findCep,
+                          icon: const Icon(Icons.search),
+                        ),
+                    ),
+                    inputFormatters: [_cepFormatter],
+                    validator: (String? value){
+                      if(value == null || value.isEmpty || !_cepFormatter.isFill()){
+                        return 'Informe um cep válido';
+                      }
+                      return null;
+                    },
+                ),
+                TextFormField(
+                    controller: _cidadeController,
+                    decoration: InputDecoration(labelText: 'Cidade'),
+                    // validator: (String? valor){
+                    //   if(valor == null || valor.trim().isEmpty){
+                    //     return "Informe a cidade";
+                    //   }
+                    //   return null;
+                    // }
+                    ),
+                TextFormField(
+                    controller: _ufController,
+                    decoration: InputDecoration(labelText: 'UF'),
+                    // validator: (String? valor){
+                    //   if(valor == null || valor.trim().isEmpty){
+                    //     return "Informe a uf";
+                    //   }
+                    //   return null;
+                    // }
+                    ),
+
 
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
@@ -252,6 +315,7 @@ void dispose() {
                               'É necessário incluir a localização.');
                         } else {
                           setState(() {
+
                             _dao.salvar(novoPonto).then((success) =>
                             {
                               if(success){
@@ -376,6 +440,9 @@ void dispose() {
     tipoImagem: _tipoImagem,
     caminhoImagem: _caminhoImagem,
     caminhoVideo: _caminhoVideo,
+    cep: _cepController.text,
+    cidade: _cidadeController.text,
+    uf: _ufController.text,
   );
 
   void _abriNoMapaInterno(){
@@ -478,6 +545,31 @@ void dispose() {
         _videoPlayerController!.play();
         _reproduzindoVideo = true;
       }
+    });
+  }
+
+  Future<void> _findCep() async{
+    if(_formKey.currentState == null || !_formKey.currentState!.validate()){
+      return;
+    }
+    setState(() {
+      _pesquisandoCep = true;
+    });
+    try{
+      _cep = await _service.findCepAsObject(_cepFormatter.getUnmaskedText());
+    } catch(e){
+      debugPrint(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Ocorreu um erro ao consultar o CEP. Tente novamente'),
+      ));
+    }finally{
+      if(_cep != null) {
+        _cidadeController.text = _cep!.localidade!;
+        _ufController.text = _cep!.uf!;
+      }
+    }
+    setState(() {
+      _pesquisandoCep = false;
     });
   }
 }

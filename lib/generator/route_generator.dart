@@ -23,6 +23,9 @@ class RouteGenerator{
         DateTime? data_inclusao;
         double latitude = 0;
         double longitude = 0;
+        String cep = '';
+        String cidade = '';
+        String uf = '';
 
         if(args != null){
           dynamic dados = settings.arguments;
@@ -34,6 +37,9 @@ class RouteGenerator{
           data_inclusao = dados['data_inclusao'];
           latitude = dados['latitude'];
           longitude = dados['longitude'];
+          cep = dados['cep'];
+          cidade = dados['cidade'];
+          uf = dados['uf'];
         }
         return MaterialPageRoute(builder: (context) => PontoFormPage(
           //ponto: args,
@@ -46,6 +52,9 @@ class RouteGenerator{
               data_inclusao: data_inclusao,
               latitude: latitude,
               longitude: longitude,
+              cep: cep,
+              cidade: cidade,
+              uf: uf,
             ),
 
         ));

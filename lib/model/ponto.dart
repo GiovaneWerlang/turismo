@@ -20,6 +20,9 @@ class Ponto{
     TIPO_IMAGEM_ASSETS,
     TIPO_IMAGEM_FILE,
   ];
+  static const CAMPO_CEP = 'cep';
+  static const CAMPO_CIDADE = 'cidade';
+  static const CAMPO_UF = 'uf';
   static const NOME_TABELA = 'ponto';
 
 
@@ -33,6 +36,10 @@ class Ponto{
   String? _tipoImagem;
   String? caminhoImagem;
   String? caminhoVideo;
+  String? cep;
+  String? cidade;
+  String? uf;
+
 
   Ponto({
     this.id,
@@ -42,6 +49,9 @@ class Ponto{
     required this.data_inclusao,
     required this.latitude,
     required this.longitude,
+    this.cep,
+    this.cidade,
+    this.uf,
     String? tipoImagem,
     this.caminhoImagem,
     this.caminhoVideo,
@@ -67,6 +77,9 @@ class Ponto{
     CAMPO_DATA_INCLUSAO: DateFormat('yyyy-MM-dd').format(data_inclusao!),
     CAMPO_LATITUDE: latitude,
     CAMPO_LONGITUDE: longitude,
+    CAMPO_CEP: cep,
+    CAMPO_CIDADE: cidade,
+    CAMPO_UF: uf,
   };
 
   Map<String, dynamic> routeMap() => <String, dynamic>{
@@ -77,6 +90,9 @@ class Ponto{
     CAMPO_DATA_INCLUSAO: data_inclusao!,
     CAMPO_LATITUDE: latitude,
     CAMPO_LONGITUDE: longitude,
+    CAMPO_CEP: cep,
+    CAMPO_CIDADE: cidade,
+    CAMPO_UF: uf,
   };
 
   factory Ponto.fromMap(Map<String, dynamic> map) => Ponto(
@@ -92,6 +108,9 @@ class Ponto{
     map[CAMPO_CAMINHO_IMAGEM] is String ? map[CAMPO_CAMINHO_IMAGEM] : null,
     caminhoVideo:
     map[CAMPO_CAMINHO_VIDEO] is String ? map[CAMPO_CAMINHO_VIDEO] : null,
+    cep: map[CAMPO_CEP] is String ? map[CAMPO_CEP] : '',
+    cidade: map[CAMPO_CIDADE] is String ? map[CAMPO_CIDADE] : '',
+    uf: map[CAMPO_UF] is String ? map[CAMPO_UF] : '',
   );
 
   static String getTipoImagemLabel(String tipoImagem) {

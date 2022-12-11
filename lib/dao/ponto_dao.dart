@@ -62,7 +62,10 @@ class PontoDao{
         Ponto.CAMPO_LONGITUDE,
         Ponto.CAMPO_TIPO_IMAGEM,
         Ponto.CAMPO_CAMINHO_IMAGEM,
-        Ponto.CAMPO_CAMINHO_VIDEO
+        Ponto.CAMPO_CAMINHO_VIDEO,
+        Ponto.CAMPO_CEP,
+        Ponto.CAMPO_CIDADE,
+        Ponto.CAMPO_UF,
       ],
       where: where,
       orderBy: orderBy,
