@@ -40,8 +40,8 @@ class _VisualizadorImagemState extends State<VisualizadorImagem> {
     if (widget.tipoImagem == Ponto.TIPO_IMAGEM_NETWORK) {
       if(widget.caminhoImagem == null || widget.caminhoImagem!.contains('assets')) {
         final random = Random();
-        caminho = 'https://picsum.photos/200?random=${random.nextInt(
-            100) + 1}';
+        caminho = 'https://picsum.photos/id/${random.nextInt(
+            100) + 1}/200';
         widget.caminhoImagem = caminho;
       }
       return DecorationImage(

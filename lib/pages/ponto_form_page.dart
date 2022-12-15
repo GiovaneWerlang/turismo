@@ -88,6 +88,7 @@ class _PontoFormPageState extends State<PontoFormPage>{
       _latitudeController.text = widget.ponto!.latitude.toString();
       _longitudeController.text = widget.ponto!.longitude.toString();
       _tipoImagem = widget.ponto!.tipoImagem;
+      if(_tipoImagem.isEmpty)  _tipoImagem = Ponto.TIPO_IMAGEM_ASSETS;
       _caminhoImagem = widget.ponto!.caminhoImagem;
       _caminhoVideo = widget.ponto!.caminhoVideo;
       _cepController.text = widget.ponto!.cep.toString();
@@ -186,22 +187,20 @@ void dispose() {
                 TextFormField(
                     controller: _cidadeController,
                     decoration: InputDecoration(labelText: 'Cidade'),
-                    // validator: (String? valor){
-                    //   if(valor == null || valor.trim().isEmpty){
-                    //     return "Informe a cidade";
-                    //   }
-                    //   return null;
-                    // }
+                    onChanged: (value) => {
+                      if(value == null || value.trim().isEmpty){
+                        _mostrarMensagem("Informe a Cidade")
+                      }
+                    },
                     ),
                 TextFormField(
                     controller: _ufController,
                     decoration: InputDecoration(labelText: 'UF'),
-                    // validator: (String? valor){
-                    //   if(valor == null || valor.trim().isEmpty){
-                    //     return "Informe a uf";
-                    //   }
-                    //   return null;
-                    // }
+                    onChanged: (value) => {
+                    if(value == null || value.trim().isEmpty){
+                    _mostrarMensagem("Informe a UF")
+                    }
+                    },
                     ),
 
 
@@ -245,14 +244,6 @@ void dispose() {
                     if (novoValor?.isNotEmpty == true) {
                       setState(() {
                         _tipoImagem = novoValor!;
-                        if(_tipoImagem ==  Ponto.TIPO_IMAGEM_NETWORK){
-                          if(_caminhoImagem == null)
-                            _caminhoImagem = 'https://picsum.photos/200?random=${Random().nextInt(100) + 1}';
-                        }
-                        if(_tipoImagem ==  Ponto.TIPO_IMAGEM_ASSETS){
-                          if(_caminhoImagem == null)
-                          _caminhoImagem = 'assets/imagem_${Random().nextInt(3) + 1}.jpg';
-                        }
                       });
                     }
                   },
@@ -273,14 +264,9 @@ void dispose() {
                         ImageSource.camera, PontoFormPage.imagem),
                   ),
                 ],
-                // VisualizadorImagem(
-                //   tipoImagem: _tipoImagem,
-                //   caminhoImagem: _caminhoImagem,
-                //   size: constraints.maxWidth,
-                // ),
                 Container(
                 width: ((MediaQuery.of(context).size.width) / 0.5),
-                height:  ((MediaQuery.of(context).size.width) / 0.5),
+                height:  ((MediaQuery.of(context).size.height) / 3),
                 decoration: BoxDecoration(
                 image: _criarWidgetImagem(),
                 ),
@@ -596,8 +582,8 @@ void dispose() {
       if (_tipoImagem == Ponto.TIPO_IMAGEM_NETWORK) {
         if(_caminhoImagem == null || _caminhoImagem!.contains('assets')) {
           final random = Random();
-          caminho = 'https://picsum.photos/200?random=${random.nextInt(
-              100) + 1}';
+          caminho = 'https://picsum.photos/id/${random.nextInt(
+              100) + 1}/200';
           _caminhoImagem = caminho;
         }
         return DecorationImage(
@@ -617,11 +603,12 @@ void dispose() {
           return null;
         }
       } else {
-        if(_caminhoImagem == null || _caminhoImagem!.contains('picsum')) {
+        _tipoImagem = Ponto.TIPO_IMAGEM_ASSETS;
+
           final random = Random();
           final caminho = 'assets/imagem_${random.nextInt(3) + 1}.jpg';
           _caminhoImagem = caminho;
-        }
+
         return DecorationImage(
           image: AssetImage(caminho),
         );

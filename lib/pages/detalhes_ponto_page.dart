@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
@@ -36,6 +37,13 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
       padding: EdgeInsets.all(20),
       child: ListView(
         children: [
+          Container(
+            width: ((MediaQuery.of(context).size.width) / 0.5),
+            height:  ((MediaQuery.of(context).size.height) / 3),
+            decoration: BoxDecoration(
+              image: _criarWidgetImagem(),
+            ),
+          ),
           Container(
             margin: EdgeInsets.only(top:10),
             child:
@@ -153,11 +161,6 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
                   Valor(valor: widget.ponto.caminhoImagem.toString()),
                 ],
               )),
-          // VisualizadorImagem(
-          //   tipoImagem: widget.ponto.tipoImagem,
-          //   caminhoImagem: widget.ponto.caminhoImagem,
-          //   size: ((MediaQuery.of(context).size.width) / 0.5),
-          // ),
           Container(
             margin: EdgeInsets.only(top: 10),
             child:
@@ -222,7 +225,7 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
                         _getlocalizacaoAtual();
                         if(_localizacaoAtual != null) {
                           Navigator.of(context).push(
-                              MaterialPageRoute( //outra forma de abrir uma page
+                              MaterialPageRoute(
                                 builder: (_) =>
                                     RotaPage(
                                         latitudeInicial:_localizacaoAtual!.latitude,
@@ -357,6 +360,34 @@ class _DetalhesPontoPageState extends State<DetalhesPontoPage>{
         ],
       ),
     );
+  }
+
+  DecorationImage? _criarWidgetImagem() {
+    var caminho = widget.ponto.caminhoImagem;
+
+    if (widget.ponto.tipoImagem == Ponto.TIPO_IMAGEM_NETWORK) {
+      return DecorationImage(
+        image: NetworkImage(
+          caminho!,
+        ),
+
+      );
+    } else if(widget.ponto.tipoImagem == Ponto.TIPO_IMAGEM_FILE) {
+      if (caminho?.isNotEmpty == true) {
+        final file = File(caminho!);
+        caminho = file.path;
+        return DecorationImage(
+          image: FileImage(file),
+        );
+      } else {
+        return null;
+      }
+    } else {
+
+      return DecorationImage(
+        image: AssetImage(caminho!),
+      );
+    }
   }
 
 }

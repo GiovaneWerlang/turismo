@@ -37,7 +37,15 @@ class DatabaseProvider{
         ${Ponto.CAMPO_DETALHE} TEXT NOT NULL,
         ${Ponto.CAMPO_DESCRICAO} TEXT, 
         ${Ponto.CAMPO_DIFERENCIAL} TEXT, 
-        ${Ponto.CAMPO_DATA_INCLUSAO} TEXT
+        ${Ponto.CAMPO_DATA_INCLUSAO} TEXT,
+        ${Ponto.CAMPO_LATITUDE} REAL NOT NULL DEFAULT 0,
+        ${Ponto.CAMPO_LONGITUDE} REAL NOT NULL DEFAULT 0,
+        ${Ponto.CAMPO_TIPO_IMAGEM} TEXT NOT NULL DEFAULT ' ',
+        ${Ponto.CAMPO_CAMINHO_IMAGEM} TEXT,
+        ${Ponto.CAMPO_CAMINHO_VIDEO} TEXT,
+        ${Ponto.CAMPO_CEP} TEXT,
+        ${Ponto.CAMPO_CIDADE} TEXT,
+        ${Ponto.CAMPO_UF} TEXT
       )
     ''');
   }
